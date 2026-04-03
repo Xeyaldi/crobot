@@ -36,10 +36,14 @@ words = {
     "qarisig": ["Telefon", "Kitab", "Təyyarə", "Futbol", "Musiqi", "Televizor", "Kompüter", "Soyuducu", "Maşın", "Velosiped", "Saat", "Eynək", "Qələm", "Dəftər", "Çanta", "Ayaqqabı", "Paltar", "Yataq", "Masa", "Kürsü", "Pəncərə", "Qapı", "Divar", "Həyət", "Bağça", "Gül", "Ağaç", "Günəş", "Ay", "Ulduz", "Bulud", "Yağış", "Qar", "Külək", "Şimşək", "Dəniz", "Çay", "Dağ", "Meşə", "Yol", "Körpü", "Bina", "Məktəb", "Xəstəxana", "Aptek", "Market", "Restoran", "Kino", "Teatr", "Muzey", "Park", "Heyvanxana", "Pişik", "İt", "At", "İnək", "Qoyun", "Toyuq", "Quş", "Balıq", "Arı", "Kəpənək", "Alma", "Armud", "Nar", "Üzüm", "Banan", "Limon", "Kartof", "Soğan", "Pomidor", "Xiyar", "Çörək", "Su", "Çay", "Qəhvə", "Süd", "Şirə", "Dondurma", "Şokolad", "Konfet", "Tort", "Pizza", "Burger", "Kabab", "Plov", "Dovğa", "Həkim", "Müəllim", "Mühəndis", "Polis", "Əsgər", "Sürücü", "Aşpaz", "Rəssam", "Müğənni", "Aktyor", "Futbolçu", "Şahmat", "Tennis", "Voleybol", "Basketbol", "Üzgüçülük", "Boks", "Güləş", "Karate", "Gitara", "Pianino", "Tar", "Kamança", "Saz", "Radio", "Kamera", "Batareya", "Lampa", "Ütü", "Tozsoran", "Fen", "Tərəzi", "Mikroskop", "Teleskop", "Reket", "Peyk", "Raket", "Kosmos", "Planet", "Mars", "Yupiter", "Qara dəlik", "Qalaktika", "Uçan boşqab"]
 }
 
-async def add_point(user, chat_id=None):
+async def add_point(user, chat_id=None, chat_title="Qrup"):
     await users_col.update_one({"user_id": user.id}, {"$inc": {"points": 5}, "$set": {"name": user.first_name}}, upsert=True)
     if chat_id:
-        await groups_col.update_one({"group_id": chat_id, "user_id": user.id}, {"$inc": {"points": 5}, "$set": {"name": user.first_name}}, upsert=True)
+        await groups_col.update_one(
+            {"group_id": chat_id, "user_id": user.id}, 
+            {"$inc": {"points": 5}, "$set": {"name": user.first_name, "group_name": chat_title}}, 
+            upsert=True
+        )
 
 # --- MESAJ YOXLIYAN ---
 @app.on_message(filters.text & filters.group, group=1)
@@ -47,14 +51,21 @@ async def check_word(client, message):
     chat_id = message.chat.id
     if chat_id in active_games:
         game_data = active_games[chat_id]
-        if not game_data.get('apariçi'): return # Aparıcı yoxdursa yoxlama
+        if not game_data.get('apariçi'): return 
         
-        if message.from_user.id == game_data['apariçi']: return # Aparıcı özü tapa bilməz
-
         correct_word = game_data['word'].lower()
+        
+        if message.from_user.id == game_data['apariçi']:
+            if message.text.lower() == correct_word:
+                try:
+                    await message.delete()
+                    await message.reply(f"🚫 {message.from_user.mention}, aparıcı sözü yaza bilməz! Mesaj silindi.")
+                except: pass
+            return 
+
         if message.text.lower() == correct_word:
             user = message.from_user
-            await add_point(user, chat_id)
+            await add_point(user, chat_id, message.chat.title)
             
             mode = game_data.get('mode', 'chat')
             cat = game_data.get('cat', 'qarisig')
@@ -80,14 +91,23 @@ async def check_word(client, message):
             ])
             await message.reply(text, reply_markup=keyboard)
 
-# --- START MESAJI (Qrup və Şəxsi + Effekt) ---
+# --- START MESAJI ---
 @app.on_message(filters.command("start"))
 async def start(client, message):
     bot = await client.get_me()
+    m = await message.reply("⚙️ **Yüklənir...**")
+    await asyncio.sleep(0.4)
+    await m.delete()
+
+    rule_text = (
+        "📖 **Oyun haqqında:**\nAparıcı gizli sözü izah edir, tapanda o adam yeni aparıcı olur.\n"
+        "🚫 **Qayda:** Aparıcı sözü yaza bilməz!"
+    )
+
     if message.chat.type == "private":
-        text = f"✨ **Xoş gəldin, {message.from_user.first_name}!**\n\n🎬 Mən qruplarda **Səssiz Sinema (Cro)** oynadan əyləncəli bir botam.\n\n🚀 Başlamaq üçün məni qrupa əlavə et!"
+        text = f"✨ **Xoş gəldin, {message.from_user.first_name}!**\n\n{rule_text}"
     else:
-        text = f"👋 **Salam {message.chat.title} üzvləri!**\n\n🎮 Mən hazıram! Oyunu başlatmaq üçün `/game` yazın.\n✨ Hər kəsə uğurlar!"
+        text = f"👋 **Salam {message.chat.title}!**\n\nOyunu başlatmaq üçün `/game` yazın."
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➕ Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
@@ -96,32 +116,27 @@ async def start(client, message):
     ])
     await message.reply_photo(photo=START_IMG, caption=text, reply_markup=keyboard)
 
-# --- REYTİNQ KOMANDALARI ---
-@app.on_message(filters.command("croreyting"))
-async def g_rank(client, message):
-    top = await users_col.find().sort("points", -1).limit(10).to_list(10)
-    text = "🌍 **Global Reytinq (Top 10):**\n\n"
-    for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
-    await message.reply(text)
+# --- ŞƏKİLDƏKİ KİMİ REYTİNG MENYUSU ---
+@app.on_message(filters.command("reyting"))
+async def rating_cmd(client, message):
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📈 Qrupunuz üzrə Reytinqlər", callback_data="group_rank")],
+        [InlineKeyboardButton("📊 Ümumi Reytinqlər", callback_data="global_rank")],
+        [InlineKeyboardButton("📕 Top Qruplar", callback_data="top_groups")]
+    ])
+    await message.reply("Aşağıdan hansı reytinq cədvəlinə baxmaq istəyirsinizsə seçin:", reply_markup=keyboard)
 
-@app.on_message(filters.command("qrupreyting") & filters.group)
-async def q_rank(client, message):
-    top = await groups_col.find({"group_id": message.chat.id}).sort("points", -1).limit(10).to_list(10)
-    text = f"🏠 **Qrup Reytinqi:**\n\n"
-    for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
-    await message.reply(text if top else "Hələ xal yoxdur.")
-
-# --- OYUN MENYUSU (Aktiv Oyun Yoxlaması ilə) ---
+# --- OYUN MENYUSU ---
 @app.on_message(filters.command(["game", "menu", "crostart"]) & filters.group)
 async def menu_cmd(client, message):
     if message.chat.id in active_games:
-        return await message.reply("⚠️ **Artıq aktiv bir oyun var!**\nZəhmət olmasa mövcud oyunun bitməsini gözləyin və ya aparıcı imtina etsin.")
+        return await message.reply("⚠️ **Artıq aktiv bir oyun var!**")
     
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("📝 Chatda Cro", callback_data="sel_chat"),
          InlineKeyboardButton("🎤 Səslidə Cro", callback_data="sel_voice")]
     ])
-    await message.reply("🎮 **Oyun Başlayır!**\nHansı Modda oynamaq istəyirsiniz ?", reply_markup=keyboard)
+    await message.reply("🎮 **Oyun Menyusu**\nHansı modda oynamaq istəyirsiniz?", reply_markup=keyboard)
 
 # --- CALLBACKS ---
 @app.on_callback_query()
@@ -132,9 +147,34 @@ async def queries(client, callback_query: CallbackQuery):
 
     if data == "global_rank":
         top = await users_col.find().sort("points", -1).limit(10).to_list(10)
-        text = "🏆 **Global Liderlər:**\n\n"
+        text = "🌍 **Ümumi Reytinqlər (Top 10):**\n\n"
         for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
-        await callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data="back_start")]]))
+        await callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data="back_rating")]]))
+
+    elif data == "group_rank":
+        top = await groups_col.find({"group_id": cid}).sort("points", -1).limit(10).to_list(10)
+        text = "📈 **Qrup üzrə Reytinqlər:**\n\n"
+        for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
+        await callback_query.edit_message_text(text if top else "Bu qrupda hələ xal yoxdur.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data="back_rating")]]))
+
+    elif data == "top_groups":
+        pipeline = [
+            {"$group": {"_id": "$group_id", "total_points": {"$sum": "$points"}, "name": {"$first": "$group_name"}}},
+            {"$sort": {"total_points": -1}},
+            {"$limit": 10}
+        ]
+        top_g = await groups_col.aggregate(pipeline).to_list(10)
+        text = "📕 **Ən Aktiv Qruplar:**\n\n"
+        for i, g in enumerate(top_g, 1): text += f"{i}. {g['name']} — {g['total_points']} xal\n"
+        await callback_query.edit_message_text(text if top_g else "Hələ aktiv qrup yoxdur.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data="back_rating")]]))
+
+    elif data == "back_rating":
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📈 Qrupunuz üzrə Reytinqlər", callback_data="group_rank")],
+            [InlineKeyboardButton("📊 Ümumi Reytinqlər", callback_data="global_rank")],
+            [InlineKeyboardButton("📕 Top Qruplar", callback_data="top_groups")]
+        ])
+        await callback_query.edit_message_text("Aşağıdan hansı reytinq cədvəlinə baxmaq istəyirsinizsə seçin:", reply_markup=keyboard)
 
     elif data == "back_start":
         bot = await client.get_me()
@@ -161,7 +201,7 @@ async def queries(client, callback_query: CallbackQuery):
         mode = parts[1]
         cat = "_".join(parts[2:])
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🙋‍♂️ Mən Aparıcı Olum", callback_data=f"run_{mode}_{cat}")]])
-        await callback_query.edit_message_text(f"✅ Kateqoriya: **{cat.upper()}**\n\nKim izah etmək istəyir? Düyməyə basın!", reply_markup=keyboard)
+        await callback_query.edit_message_text(f"✅ Kateqoriya: **{cat.upper()}**\n\nKim izah etmək istəyir?", reply_markup=keyboard)
 
     elif data.startswith("run_"):
         parts = data.split("_")
@@ -171,7 +211,7 @@ async def queries(client, callback_query: CallbackQuery):
         active_games[cid] = {"word": word, "apariçi": user.id, "mode": mode, "cat": cat}
         await client.answer_callback_query(callback_query.id, text=f"🎯 Sənin Sözün: {word}", show_alert=True)
         
-        text = f"🎤 {user.mention} - sözü izah edir. Uğurlar!"
+        text = f"🎤 {user.mention} - sözü izah edir. Başladıq!"
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
             [InlineKeyboardButton("Aparıcılıqdan İmtina ❌", callback_data="imtina")],
@@ -204,7 +244,7 @@ async def queries(client, callback_query: CallbackQuery):
 
     elif data == "imtina":
         if cid in active_games and user.id == active_games[cid]['apariçi']:
-            active_games[cid]['apariçi'] = None # Aparıcı çıxdı
+            active_games[cid]['apariçi'] = None 
             await callback_query.edit_message_text(
                 f"👤 {user.mention} aparıcılıqdan imtina etdi!\n\nKim davam etmək istəyir?", 
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🎤 Mən Aparıcı Olum", callback_data="take_lead")]])
@@ -218,7 +258,6 @@ async def queries(client, callback_query: CallbackQuery):
             word = active_games[cid]['word']
             cat = active_games[cid]['cat']
             mode = active_games[cid]['mode']
-            
             await callback_query.answer(f"🎯 Sənin Sözün: {word}", show_alert=True)
             text = f"🎤 Yeni Aparıcı: {user.mention}\n\nİzah etməyə davam et!"
             keyboard = InlineKeyboardMarkup([
@@ -228,7 +267,7 @@ async def queries(client, callback_query: CallbackQuery):
             ])
             await callback_query.edit_message_text(text, reply_markup=keyboard)
         else:
-            await callback_query.answer("Artıq bir aparıcı var və ya oyun tapılmadı!", show_alert=True)
+        await callback_query.answer("Artıq bir aparıcı var!", show_alert=True)
 
     elif data == "back_menu":
         keyboard = InlineKeyboardMarkup([
@@ -240,11 +279,11 @@ async def queries(client, callback_query: CallbackQuery):
 # --- İŞƏ SALMA ---
 async def main():
     await app.start()
+    # Komandaları botun menyusuna əlavə edirik
     await app.set_bot_commands([
         BotCommand("start", "Botu başladar"),
         BotCommand("game", "Oyunu başladar"),
-        BotCommand("croreyting", "Global reytinq"),
-        BotCommand("qrupreyting", "Qrup reytinqi")
+        BotCommand("reyting", "Reytinq menyusu")
     ])
     print("🚀 HT-Cro Bot İşləyir!")
     await asyncio.Event().wait()
