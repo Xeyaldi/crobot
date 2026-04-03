@@ -5,7 +5,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, BotCommand
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# --- CONFIG VARS (TOXUNULMADI) ---
+# --- CONFIG VARS ---
 API_ID = int(os.environ.get("API_ID", 12345))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -18,7 +18,7 @@ SUPPORT_GRP = os.environ.get("SUPPORT_GRP", "https://t.me/your_group")
 BOT_CHANNEL = os.environ.get("BOT_CHANNEL", "https://t.me/your_channel")
 OWNER_LINK = os.environ.get("OWNER_LINK", "https://t.me/your_username")
 
-# MongoDB (TOXUNULMADI)
+# MongoDB
 mongo_client = AsyncIOMotorClient(MONGO_URL)
 db = mongo_client["cro_bot_db"]
 users_col = db["users"]
@@ -26,10 +26,9 @@ groups_col = db["groups"]
 
 app = Client("izah_et_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# Aktiv oyunlar
 active_games = {} 
 
-# --- SÖZ BAZASI (TAMDIR, BİR HƏRF BELƏ SİLİNMƏDİ) ---
+# --- SÖZ BAZASI (TOXUNULMADI) ---
 words = {
     "tarix": ["Atabəylər", "Şah İsmayıl", "Nadir Şah", "Çaldıran döyüşü", "Tomris", "Babək", "Cavanşir", "M.Ə.Rəsulzadə", "Şah Abbas", "Gülüstan müqaviləsi", "Türkmənçay müqaviləsi", "Səfəvilər", "Hülakülər", "Səlcuqlular", "Osmanlı", "Napoleon", "Hitler", "Atatürk", "Xətai", "Qara Qoyunlu", "Ağ Qoyunlu", "Şirvanşahlar", "Dərbənd", "Xəzər Xaqanlığı", "Atropatena", "Albaniya", "Manna", "Sümerlər", "Misir piramidaları", "Roma İmperiyası", "Yulius Sezar", "Spartak", "Çingiz Xan", "Əmir Teymur", "Sultan Süleyman", "Fatih Sultan Mehmet", "Məlhəmə döyüşü", "İkinci Dünya Müharibəsi", "Qarabağ müharibəsi", "Şuşa bəyannaməsi", "Naxçıvan xanlığı", "Cavad xan", "Pənahəli xan", "Xurşidbanu Natəvan", "Mirzə Fətəli Axundov", "Nizami Gəncəvi", "Füzuli", "Nəsimi", "Dədə Qorqud", "Koroğlu", "Qaçaq Nəbi", "Zəngəzur", "İrəvan xanlığı", "Bakı xanlığı", "Gəncə mühasirəsi", "20 Yanvar", "Xocalı soyqırımı", "ADR", "Vikinqlər", "Raqnar Lodbrok", "Alfred Veliki", "Uhtred", "Ekskalibur", "Qızıl Orda", "Monqollar", "Səlib yürüşləri", "Renessans", "Fransız inqilabı", "Sənaye inqilabı", "Kolumb", "Magellan", "Vasko da Qama", "Da Vinçi", "Eynşteyn", "Nyuton", "Arximed", "Pifaqor", "Sokrat", "Platon", "Aristotel", "Böyük İskəndər", "Dara", "Hannibal", "Alparslan", "Malazgird döyüşü", "Ertuğrul Qazi", "Osman Qazi", "Şah Təhmasib", "Zərdabi", "A.Bakıxanov", "Əhməd Cavad", "Üzeyir Hacıbəyov", "Lütfi Zadə", "Heydər Əliyev", "İlham Əliyev", "Zəfər Günü", "Xudafərin", "Araz", "Kür", "Göyçə", "Borçalı", "Təbriz", "Ərdəbil", "Urmiya", "Zənjan", "Qəzvin", "Həmədan", "Marağa", "Xoy", "Maku", "Quba xanlığı", "Şəki xanlığı", "Hacı Çələbi", "Fətəli xan", "İbrahimxəlil xan", "Vaqif", "Vidadi", "Molla Nəsrəddin", "Sabir", "Cavid", "Müşfiq", "Vurğun", "Şəhriyar", "B.Vahabzadə", "Xəlil Rza", "Məmməd Araz", "İsmayıl Şıxlı", "Anar", "Elçin", "Çingiz Abdullayev", "Mesopotamiya", "Babil", "Hammurapi qanunları", "Assuriya", "Urartu", "Mediya", "Əhəmənilər", "Parfiya", "Bizans", "Frank dövləti", "I Pyotr", "II Yekaterina", "I Dünya Müharibəsi", "Mudros barışığı", "Sevr müqaviləsi", "Lozan müqaviləsi", "Soyuq müharibə", "SSRİ", "NATO", "Varşava müqaviləsi", "BMT", "UNESCO", "İslam Həmrəyliyi"],
     "cografiya": ["Everest", "Amazon", "Xəzər dənizi", "Bakı", "Gəncə", "Sumqayıt", "Naxçıvan", "Lənkəran", "Şəki", "Quba", "Şuşa", "Kəlbəcər", "Ağdam", "Füzuli", "Cəbrayıl", "Zəngilan", "Qubadlı", "Laçın", "Xocalı", "Xocavənd", "Ağdərə", "Xankəndi", "Böyük Qafqaz", "Kiçik Qafqaz", "Murovdağ", "Şahdağ", "Tufandağ", "Bazardüzü", "Kür çayı", "Araz çayı", "Qanıx", "Qabırrı", "Tərtər çayı", "Ağstafa çayı", "Göy Göl", "Maral Göl", "Batabat", "Ceyranbatan", "Mingəçevir", "Abşeron", "Səhra", "Savanna", "Tayqa", "Tundra", "Cəngəllik", "Sakit Okean", "Atlantik Okean", "Hind Okeanı", "Antarktida", "Avstraliya", "Afrika", "Avropa", "Asiya", "Şimali Amerika", "Cənubi Amerika", "Nil çayı", "Missisipi", "Yantszı", "Yenisey", "Volqa", "Dunay", "Alp dağları", "And dağları", "Himalay", "Ural dağları", "Böyük Səhra", "Qobi", "Qaraqum", "Qızılqum", "Atakama", "Viktoriya şəlaləsi", "Niqara", "Anxel", "Baykal gölü", "Egey dənizi", "Aralıq dənizi", "Qara dəniz", "Qırmızı dəniz", "Ölü dəniz", "Cəbəllüttariq", "Süveyş kanalı", "Panama kanalı", "İstanbul boğazı", "Dardanel", "Yaponiya", "Çin", "Hindistan", "Rusiya", "Türkiyə", "İran", "Gürcüstan", "Fransa", "Almaniya", "İtaliya", "İspaniya", "ABŞ", "Kanada", "Braziliya", "Argentina", "Misir", "Pakistan", "İndoneziya", "Meksika", "Qazaxıstan", "Özbəkistan", "Tbilisi", "Ankara", "Moskva", "London", "Paris", "Berlin", "Roma", "Madrid", "Vaşinqton", "Tokio", "Pekin", "Qahirə", "Astana", "Daşkənd", "Ekvator", "Meridian", "Paralel", "Enlik", "Uzunluq", "Xəritə", "Qlobus", "Kompas", "Azimut", "Relyef", "İqlim", "Atmosfer", "Litosfer", "Hidrosfer", "Biosfer", "Maqma", "Vulkan", "Zəlzələ", "Cunami", "Geyser", "Stalaktit", "Stalaqmit", "Arxipelaq", "Ada", "Yarımada", "Körfəz", "Boğaz", "Dərə", "Kanyon", "Plato", "Oazis", "Musson", "Passat", "Siklon", "Antisiklon", "Barometr", "Hiqrometr", "Termometr", "Anemometr", "Seysmoqraf", "Radiasiya", "Ozon qatı", "Urbanizasiya"],
@@ -37,18 +36,21 @@ words = {
     "qarisig": ["Telefon", "Kitab", "Təyyarə", "Futbol", "Musiqi", "Televizor", "Kompüter", "Soyuducu", "Maşın", "Velosiped", "Saat", "Eynək", "Qələm", "Dəftər", "Çanta", "Ayaqqabı", "Paltar", "Yataq", "Masa", "Kürsü", "Pəncərə", "Qapı", "Divar", "Həyət", "Bağça", "Gül", "Ağaç", "Günəş", "Ay", "Ulduz", "Bulud", "Yağış", "Qar", "Külək", "Şimşək", "Dəniz", "Çay", "Dağ", "Meşə", "Yol", "Körpü", "Bina", "Məktəb", "Xəstəxana", "Aptek", "Market", "Restoran", "Kino", "Teatr", "Muzey", "Park", "Heyvanxana", "Pişik", "İt", "At", "İnək", "Qoyun", "Toyuq", "Quş", "Balıq", "Arı", "Kəpənək", "Alma", "Armud", "Nar", "Üzüm", "Banan", "Limon", "Kartof", "Soğan", "Pomidor", "Xiyar", "Çörək", "Su", "Çay", "Qəhvə", "Süd", "Şirə", "Dondurma", "Şokolad", "Konfet", "Tort", "Pizza", "Burger", "Kabab", "Plov", "Dovğa", "Həkim", "Müəllim", "Mühəndis", "Polis", "Əsgər", "Sürücü", "Aşpaz", "Rəssam", "Müğənni", "Aktyor", "Futbolçu", "Şahmat", "Tennis", "Voleybol", "Basketbol", "Üzgüçülük", "Boks", "Güləş", "Karate", "Gitara", "Pianino", "Tar", "Kamança", "Saz", "Radio", "Kamera", "Batareya", "Lampa", "Ütü", "Tozsoran", "Fen", "Tərəzi", "Mikroskop", "Teleskop", "Reket", "Peyk", "Raket", "Kosmos", "Planet", "Mars", "Yupiter", "Qara dəlik", "Qalaktika", "Uçan boşqab"]
 }
 
-# --- FUNKSİYALAR (TOXUNULMADI) ---
 async def add_point(user, chat_id=None):
     await users_col.update_one({"user_id": user.id}, {"$inc": {"points": 5}, "$set": {"name": user.first_name}}, upsert=True)
     if chat_id:
         await groups_col.update_one({"group_id": chat_id, "user_id": user.id}, {"$inc": {"points": 5}, "$set": {"name": user.first_name}}, upsert=True)
 
-# --- MESAJ YOXLIYAN (SÖZÜ TAPAN) ---
+# --- MESAJ YOXLIYAN ---
 @app.on_message(filters.text & filters.group, group=1)
 async def check_word(client, message):
     chat_id = message.chat.id
     if chat_id in active_games:
         game_data = active_games[chat_id]
+        if not game_data.get('apariçi'): return # Aparıcı yoxdursa yoxlama
+        
+        if message.from_user.id == game_data['apariçi']: return # Aparıcı özü tapa bilməz
+
         correct_word = game_data['word'].lower()
         if message.text.lower() == correct_word:
             user = message.from_user
@@ -59,12 +61,9 @@ async def check_word(client, message):
             new_word = random.choice(words[cat])
             
             if mode == "chat":
-                # Chatda Cro: Tapan yeni aparıcı olur
                 active_games[chat_id] = {"word": new_word, "apariçi": user.id, "mode": "chat", "cat": cat}
-                text = f"{user.mention} - sözü tapdı **{correct_word.capitalize()}** və yeni sözü izah edir"
-                apariçi_id = user.id
+                text = f"🎉 {user.mention} - sözü tapdı **{correct_word.capitalize()}** və yeni sözü izah edir!"
             else:
-                # Səslidə Cro: Aparıcı sabit qalır
                 active_games[chat_id]['word'] = new_word
                 apariçi_id = game_data['apariçi']
                 try:
@@ -72,20 +71,24 @@ async def check_word(client, message):
                     ap_mention = old_apariçi.mention
                 except:
                     ap_mention = "Aparıcı"
-                text = f"{user.mention} - sözü tapdı **{correct_word.capitalize()}**.\n\n{ap_mention} yeni sözü izah edir"
+                text = f"🎊 {user.mention} - sözü tapdı **{correct_word.capitalize()}**.\n\n🎤 {ap_mention} yeni sözü izah edir!"
 
             keyboard = InlineKeyboardMarkup([
                 [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{new_word}")],
-                [InlineKeyboardButton("Fikrimi Dəyişdim ❌", callback_data="imtina")],
+                [InlineKeyboardButton("Aparıcılıqdan İmtina ❌", callback_data="imtina")],
                 [InlineKeyboardButton("Növbeti Söz ♻️", callback_data=f"next_{cat}_{mode}")]
             ])
             await message.reply(text, reply_markup=keyboard)
 
-# --- START MESAJI ---
-@app.on_message(filters.command("start") & filters.private)
+# --- START MESAJI (Qrup və Şəxsi + Effekt) ---
+@app.on_message(filters.command("start"))
 async def start(client, message):
     bot = await client.get_me()
-    text = f"👋 **Salam! Mən {bot.first_name} botuyam.**\n\n🎬 Qruplarda Səssiz Sinema (Cro) oynamaq üçün məni qrupa əlavə edin!"
+    if message.chat.type == "private":
+        text = f"✨ **Xoş gəldin, {message.from_user.first_name}!**\n\n🎬 Mən qruplarda **Səssiz Sinema (Cro)** oynadan əyləncəli bir botam.\n\n🚀 Başlamaq üçün məni qrupa əlavə et!"
+    else:
+        text = f"👋 **Salam {message.chat.title} üzvləri!**\n\n🎮 Mən hazıram! Oyunu başlatmaq üçün `/game` yazın.\n✨ Hər kəsə uğurlar!"
+
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("➕ Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
         [InlineKeyboardButton("🏆 Global Reytinq", callback_data="global_rank")],
@@ -93,7 +96,7 @@ async def start(client, message):
     ])
     await message.reply_photo(photo=START_IMG, caption=text, reply_markup=keyboard)
 
-# --- REYTİNQ KOMANDALARI (TOXUNULMADI) ---
+# --- REYTİNQ KOMANDALARI ---
 @app.on_message(filters.command("croreyting"))
 async def g_rank(client, message):
     top = await users_col.find().sort("points", -1).limit(10).to_list(10)
@@ -108,16 +111,19 @@ async def q_rank(client, message):
     for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
     await message.reply(text if top else "Hələ xal yoxdur.")
 
-# --- OYUN MENYUSU ---
+# --- OYUN MENYUSU (Aktiv Oyun Yoxlaması ilə) ---
 @app.on_message(filters.command(["game", "menu", "crostart"]) & filters.group)
 async def menu_cmd(client, message):
+    if message.chat.id in active_games:
+        return await message.reply("⚠️ **Artıq aktiv bir oyun var!**\nZəhmət olmasa mövcud oyunun bitməsini gözləyin və ya aparıcı imtina etsin.")
+    
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("📝 Chatda Cro", callback_data="sel_chat"),
          InlineKeyboardButton("🎤 Səslidə Cro", callback_data="sel_voice")]
     ])
-    await message.reply("Hansı Modda oyunu başlatmaq istəyirsiniz ?", reply_markup=keyboard)
+    await message.reply("🎮 **Oyun Başlayır!**\nHansı Modda oynamaq istəyirsiniz ?", reply_markup=keyboard)
 
-# --- CALLBACKS (TAM GENİŞ HALDA) ---
+# --- CALLBACKS ---
 @app.on_callback_query()
 async def queries(client, callback_query: CallbackQuery):
     data = callback_query.data
@@ -126,7 +132,7 @@ async def queries(client, callback_query: CallbackQuery):
 
     if data == "global_rank":
         top = await users_col.find().sort("points", -1).limit(10).to_list(10)
-        text = "🌍 **Global Reytinq:**\n\n"
+        text = "🏆 **Global Liderlər:**\n\n"
         for i, u in enumerate(top, 1): text += f"{i}. {u['name']} — {u['points']} xal\n"
         await callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Geri", callback_data="back_start")]]))
 
@@ -148,14 +154,14 @@ async def queries(client, callback_query: CallbackQuery):
              InlineKeyboardButton("🌍 Coğrafiya", callback_data=f"set_{mode}_cografiya")],
             [InlineKeyboardButton("👥 İnsan Adları", callback_data=f"set_{mode}_insan_adlari")]
         ])
-        await callback_query.edit_message_text(f"📂 Mod: **{mode.capitalize()}** seçildi. Kateqoriya seçin:", reply_markup=keyboard)
+        await callback_query.edit_message_text(f"📂 Mod: **{mode.capitalize()}** seçildi.\n\n👇 **Kateqoriya seçin:**", reply_markup=keyboard)
 
     elif data.startswith("set_"):
         parts = data.split("_")
         mode = parts[1]
         cat = "_".join(parts[2:])
-        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("📝 Sözü İzah Et", callback_data=f"run_{mode}_{cat}")]])
-        await callback_query.edit_message_text(f"✅ Kateqoriya: {cat}\nKim aparıcı olacaq?", reply_markup=keyboard)
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🙋‍♂️ Mən Aparıcı Olum", callback_data=f"run_{mode}_{cat}")]])
+        await callback_query.edit_message_text(f"✅ Kateqoriya: **{cat.upper()}**\n\nKim izah etmək istəyir? Düyməyə basın!", reply_markup=keyboard)
 
     elif data.startswith("run_"):
         parts = data.split("_")
@@ -163,12 +169,12 @@ async def queries(client, callback_query: CallbackQuery):
         cat = "_".join(parts[2:])
         word = random.choice(words[cat])
         active_games[cid] = {"word": word, "apariçi": user.id, "mode": mode, "cat": cat}
-        await client.answer_callback_query(callback_query.id, text=f"Söz: {word}", show_alert=True)
+        await client.answer_callback_query(callback_query.id, text=f"🎯 Sənin Sözün: {word}", show_alert=True)
         
-        text = f"{user.mention} - sözü izah edir"
+        text = f"🎤 {user.mention} - sözü izah edir. Uğurlar!"
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
-            [InlineKeyboardButton("Fikrimi Dəyişdim ❌", callback_data="imtina")],
+            [InlineKeyboardButton("Aparıcılıqdan İmtina ❌", callback_data="imtina")],
             [InlineKeyboardButton("Növbeti Söz ♻️", callback_data=f"next_{cat}_{mode}")]
         ])
         await callback_query.edit_message_text(text, reply_markup=keyboard)
@@ -178,37 +184,58 @@ async def queries(client, callback_query: CallbackQuery):
         mode = parts[-1]
         cat = "_".join(parts[1:-1])
         if cid in active_games and user.id != active_games[cid]['apariçi']:
-            return await callback_query.answer("Yalnız aparıcı növbəti sözü keçə bilər!", show_alert=True)
+            return await callback_query.answer("Yalnız aparıcı yeni sözə keçə bilər!", show_alert=True)
         
         word = random.choice(words[cat])
         active_games[cid]['word'] = word
-        await callback_query.answer(f"Yeni Söz: {word}", show_alert=True)
+        await callback_query.answer(f"🔄 Yeni Söz: {word}", show_alert=True)
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
-            [InlineKeyboardButton("Fikrimi Dəyişdim ❌", callback_data="imtina")],
+            [InlineKeyboardButton("Aparıcılıqdan İmtina ❌", callback_data="imtina")],
             [InlineKeyboardButton("Növbeti Söz ♻️", callback_data=f"next_{cat}_{mode}")]
         ])
-        await callback_query.edit_message_text(f"{user.mention} - yeni sözü izah edir", reply_markup=keyboard)
+        await callback_query.edit_message_text(f"🎤 {user.mention} - yeni sözü izah edir", reply_markup=keyboard)
 
     elif data.startswith("look_"):
         if cid in active_games and user.id == active_games[cid]['apariçi']:
-            await callback_query.answer(f"Söz: {active_games[cid]['word']}", show_alert=True)
+            await callback_query.answer(f"🎯 Sənin Sözün: {active_games[cid]['word']}", show_alert=True)
         else:
-            await callback_query.answer("Sözə yalnız aparıcı baxa bilər!", show_alert=True)
+            await callback_query.answer("👀 Sözə yalnız aparıcı baxa bilər!", show_alert=True)
 
     elif data == "imtina":
         if cid in active_games and user.id == active_games[cid]['apariçi']:
-            del active_games[cid]
-            await callback_query.edit_message_text(f"❌ {user.mention} imtina etdi. Oyun dayandırıldı.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Yeni Oyun 🎮", callback_data="back_menu")]]))
+            active_games[cid]['apariçi'] = None # Aparıcı çıxdı
+            await callback_query.edit_message_text(
+                f"👤 {user.mention} aparıcılıqdan imtina etdi!\n\nKim davam etmək istəyir?", 
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🎤 Mən Aparıcı Olum", callback_data="take_lead")]])
+            )
         else:
-            await callback_query.answer("Yalnız aparıcı imtina edə bilər!", show_alert=True)
+            await callback_query.answer("Yalnız mövcud aparıcı imtina edə bilər!", show_alert=True)
+
+    elif data == "take_lead":
+        if cid in active_games and active_games[cid]['apariçi'] is None:
+            active_games[cid]['apariçi'] = user.id
+            word = active_games[cid]['word']
+            cat = active_games[cid]['cat']
+            mode = active_games[cid]['mode']
+            
+            await callback_query.answer(f"🎯 Sənin Sözün: {word}", show_alert=True)
+            text = f"🎤 Yeni Aparıcı: {user.mention}\n\nİzah etməyə davam et!"
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
+                [InlineKeyboardButton("Aparıcılıqdan İmtina ❌", callback_data="imtina")],
+                [InlineKeyboardButton("Növbeti Söz ♻️", callback_data=f"next_{cat}_{mode}")]
+            ])
+            await callback_query.edit_message_text(text, reply_markup=keyboard)
+        else:
+            await callback_query.answer("Artıq bir aparıcı var və ya oyun tapılmadı!", show_alert=True)
 
     elif data == "back_menu":
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("📝 Chatda Cro", callback_data="sel_chat"),
              InlineKeyboardButton("🎤 Səslidə Cro", callback_data="sel_voice")]
         ])
-        await callback_query.edit_message_text("Hansı Modda oyunu başlatmaq istəyirsiniz ?", reply_markup=keyboard)
+        await callback_query.edit_message_text("🎮 Hansı Modda oyunu başlatmaq istəyirsiniz ?", reply_markup=keyboard)
 
 # --- İŞƏ SALMA ---
 async def main():
@@ -219,7 +246,7 @@ async def main():
         BotCommand("croreyting", "Global reytinq"),
         BotCommand("qrupreyting", "Qrup reytinqi")
     ])
-    print("HT-Cro Bot İşləyir!")
+    print("🚀 HT-Cro Bot İşləyir!")
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
