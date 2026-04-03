@@ -4,14 +4,20 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-# Config Vars (Heroku Settings-dən oxunur)
+# Config Vars (Heroku Settings-dən daxil edəcəksən)
 API_ID = int(os.environ.get("API_ID", 12345))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
+# Yeni Linklər (Heroku-da bunları KEY olaraq əlavə et)
+START_IMG = os.environ.get("START_IMG", "https://telegra.ph/file/default.jpg") # Şəkil linki
+SUPPORT_GRP = os.environ.get("SUPPORT_GRP", "https://t.me/your_group") # Kömək qrupu
+BOT_CHANNEL = os.environ.get("BOT_CHANNEL", "https://t.me/your_channel") # Bot kanalı
+OWNER_LINK = os.environ.get("OWNER_LINK", "https://t.me/your_username") # Sahib linki
+
 app = Client("izah_et_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# HƏR KATEGORİYAYA AİD 150+ SÖZ
+# SƏNİN 600+ SÖZLÜK BAZAN (Toxunulmadı)
 words = {
     "tarix": [
         "Atabəylər", "Şah İsmayıl", "Nadir Şah", "Çaldıran döyüşü", "Tomris", "Babək", "Cavanşir", "M.Ə.Rəsulzadə", 
@@ -84,38 +90,74 @@ words = {
     ]
 }
 
-# Start mesajı
-@app.on_message(filters.command("start"))
+# Start Mesajı və Effekti
+@app.on_message(filters.command("start") & filters.private)
 async def start(client, message):
-    await message.reply("👋 **Salam! Mən İzah Et botuyam.**\n\n🎮 Başlamaq üçün `/game` yazın.")
+    bot = await client.get_me()
+    text = (
+        f"👋 **Salam! Mən {bot.first_name} botuyam.**\n\n"
+        "🎬 Mən qruplarda Səssiz Sinema (Cro) oynamaq üçün yaradılmışam.\n"
+        "📜 Tarix, Coğrafiya və digər modlarda sözləri izah edərək əylənə bilərsiniz.\n\n"
+        "🎮 Oyunu başlatmaq üçün məni qrupa əlavə edin!"
+    )
+    
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("➕ Məni Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
+        [InlineKeyboardButton("📢 Bot Kanalı", url=BOT_CHANNEL), InlineKeyboardButton("👤 Sahib", url=OWNER_LINK)],
+        [InlineKeyboardButton("🛠 Kömək Qrupu", url=SUPPORT_GRP)]
+    ])
+    
+    # Şəkil ilə göndərmə
+    await message.reply_photo(photo=START_IMG, caption=text, reply_markup=keyboard)
 
-# Oyun menyusu
-@app.on_message(filters.command("game"))
+# Oyun Menyusu (HT-Cro dizaynı)
+@app.on_message(filters.command(["game", "menu"]))
 async def game_menu(client, message):
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🌍 Coğrafiya", callback_data="start_cografiya"),
-         InlineKeyboardButton("📜 Tarix", callback_data="start_tarix")],
-        [InlineKeyboardButton("👥 İnsan Adları", callback_data="start_insan_adlari"),
-         InlineKeyboardButton("🎲 Qarışıq", callback_data="start_qarisig")]
+        [InlineKeyboardButton("🌀 Qarışıq Sözlər", callback_data="select_qarisig")],
+        [InlineKeyboardButton("📜 Tarix", callback_data="select_tarix"), 
+         InlineKeyboardButton("🌍 Coğrafiya", callback_data="select_cografiya")],
+        [InlineKeyboardButton("👥 İnsan Adları", callback_data="select_insan_adlari")],
+        [InlineKeyboardButton("🛑 Oyunu Bitir", callback_data="end_game")]
     ])
-    await message.reply("🎮 **Hansı modda oyuna başlamaq istəyirsiniz?**", reply_markup=keyboard)
+    await message.reply(f"🎮 **HT-Cro modunu seçin:**", reply_markup=keyboard)
 
-# Callback funksiyaları
+# Callback İşləmələri
 @app.on_callback_query()
 async def handle_query(client, callback_query: CallbackQuery):
     data = callback_query.data
     user = callback_query.from_user
 
-    if data.startswith("start_"):
+    # Mod seçildi (HT-Cro şəkli 2-dəki kimi)
+    if data.startswith("select_"):
+        mod = data.replace("select_", "")
+        mod_name = mod.replace("_", " ").capitalize()
+        text = f"✅ **{mod_name}** modu seçildi!\n\n👇 Kim izah etmək istəyir? Butona basın."
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎤 Sözü İzah Et", callback_data=f"start_{mod}")],
+            [InlineKeyboardButton("⬅️ Modu Dəyiş", callback_data="back_to_menu")],
+            [InlineKeyboardButton("🛑 Oyunu Bitir", callback_data="end_game")]
+        ])
+        await callback_query.edit_message_text(text, reply_markup=keyboard)
+
+    # Oyuna Başla (Aparıcı təyin olundu)
+    elif data.startswith("start_"):
         category = data.replace("start_", "")
         word = random.choice(words[category])
-        await client.answer_callback_query(callback_query.id, text=f"Sizin sözünüz: {word}", show_alert=True)
-        cat_names = {"tarix": "📜 Tarix", "cografiya": "🌍 Coğrafiya", "insan_adlari": "👥 İnsan Adları", "qarisig": "🎲 Qarışıq"}
-        text = f"👤 {user.mention} **{cat_names[category]}** modunda oyunu başlatdı!\n\n{user.first_name} - sözü izah edir..."
+        await client.answer_callback_query(callback_query.id, text=f"Sözünüz: {word}", show_alert=True)
+        
+        cat_names = {"tarix": "Tarix", "cografiya": "Coğrafiya", "insan_adlari": "İnsan Adları", "qarisig": "Qarışıq"}
+        
+        text = (
+            f"👤 **Aparıcı:** {user.mention}\n"
+            f"📁 **Mod:** {cat_names[category]}\n"
+            f"📢 Sözü izah edir... Tapın görək!"
+        )
+        
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
-            [InlineKeyboardButton("Fikrimi Dəyişdim (İmtina) ❌", callback_data="imtina")],
-            [InlineKeyboardButton("Növbəti Söz ♻️", callback_data=f"start_{category}")]
+            [InlineKeyboardButton("🔍 Sözə Baxmaq", callback_data=f"look_{word}")],
+            [InlineKeyboardButton("❌ Fikrimi Dəyişdim", callback_data="imtina")],
+            [InlineKeyboardButton("♻️ Növbəti Söz", callback_data=f"start_{category}")]
         ])
         await callback_query.edit_message_text(text, reply_markup=keyboard)
 
@@ -124,28 +166,29 @@ async def handle_query(client, callback_query: CallbackQuery):
         await client.answer_callback_query(callback_query.id, text=f"Söz: {word}", show_alert=True)
 
     elif data == "imtina":
-        text = f"❌ {user.mention} aparıcılıqdan imtina etdi!\n\nKim aparıcı olmaq istəyir?"
-        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Aparıcı olmaq istəyirəm 🎤", callback_data="new_game")]])
+        text = f"❌ {user.mention} aparıcılıqdan imtina etdi!\n\nKim aparıcı olmaq istəyir? ✅"
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Aparıcı olmaq istəyirəm ✅", callback_data="back_to_menu")]])
         await callback_query.edit_message_text(text, reply_markup=keyboard)
 
-    elif data == "new_game":
+    elif data == "back_to_menu":
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🌍 Coğrafiya", callback_data="start_cografiya"),
-             InlineKeyboardButton("📜 Tarix", callback_data="start_tarix")],
-            [InlineKeyboardButton("👥 İnsan Adları", callback_data="start_insan_adlari"),
-             InlineKeyboardButton("🎲 Qarışıq", callback_data="start_qarisig")]
+            [InlineKeyboardButton("🌀 Qarışıq Sözlər", callback_data="select_qarisig")],
+            [InlineKeyboardButton("📜 Tarix", callback_data="select_tarix"), 
+             InlineKeyboardButton("🌍 Coğrafiya", callback_data="select_cografiya")],
+            [InlineKeyboardButton("👥 İnsan Adları", callback_data="select_insan_adlari")],
+            [InlineKeyboardButton("🛑 Oyunu Bitir", callback_data="end_game")]
         ])
-        await callback_query.edit_message_text("🎮 **Hansı modda oyuna başlamaq istəyirsiniz?**", reply_markup=keyboard)
+        await callback_query.edit_message_text("🎮 **HT-Cro modunu seçin:**", reply_markup=keyboard)
 
-# Düzgün asyncio başlatma mexanizmi
+    elif data == "end_game":
+        await callback_query.edit_message_text("🛑 Oyun bitirildi. Yeni oyun üçün /game yazın.")
+
+# Asyncio Başlatma
 async def main():
     await app.start()
-    print("Bot işə düşdü...")
+    print("Bot HT-Cro dizaynı ilə aktivdir!")
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        pass
+    loop.run_until_complete(main())
