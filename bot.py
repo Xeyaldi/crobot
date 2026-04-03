@@ -1,16 +1,17 @@
 import os
 import random
+import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-# Heroku-da Config Vars bölməsindən oxunacaq məlumatlar
-API_ID = int(os.environ.get("API_ID", 12345)) # Varsayılan rəqəmi dəyişməyə ehtiyac yoxdur
+# Config Vars (Heroku Settings-dən oxunur)
+API_ID = int(os.environ.get("API_ID", 12345))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 app = Client("izah_et_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# 150+ Sözdən ibarət Baza
+# HƏR KATEGORİYAYA AİD 150+ SÖZ
 words = {
     "tarix": [
         "Atabəylər", "Şah İsmayıl", "Nadir Şah", "Çaldıran döyüşü", "Tomris", "Babək", "Cavanşir", "M.Ə.Rəsulzadə", 
@@ -83,13 +84,12 @@ words = {
     ]
 }
 
-# Start Mesajı
+# Start mesajı
 @app.on_message(filters.command("start"))
 async def start(client, message):
-    text = "👋 **Salam! Mən İzah Et botuyam.**\n\nTarix, Coğrafiya və digər maraqlı kateqoriyalarda dostlarınızla yarışın.\n\n🎮 Başlamaq üçün `/game` yazın."
-    await message.reply(text)
+    await message.reply("👋 **Salam! Mən İzah Et botuyam.**\n\n🎮 Başlamaq üçün `/game` yazın.")
 
-# Oyun Menyusu
+# Oyun menyusu
 @app.on_message(filters.command("game"))
 async def game_menu(client, message):
     keyboard = InlineKeyboardMarkup([
@@ -100,7 +100,7 @@ async def game_menu(client, message):
     ])
     await message.reply("🎮 **Hansı modda oyuna başlamaq istəyirsiniz?**", reply_markup=keyboard)
 
-# Callback Funksiyaları
+# Callback funksiyaları
 @app.on_callback_query()
 async def handle_query(client, callback_query: CallbackQuery):
     data = callback_query.data
@@ -109,13 +109,9 @@ async def handle_query(client, callback_query: CallbackQuery):
     if data.startswith("start_"):
         category = data.replace("start_", "")
         word = random.choice(words[category])
-        
         await client.answer_callback_query(callback_query.id, text=f"Sizin sözünüz: {word}", show_alert=True)
-
         cat_names = {"tarix": "📜 Tarix", "cografiya": "🌍 Coğrafiya", "insan_adlari": "👥 İnsan Adları", "qarisig": "🎲 Qarışıq"}
-        
-        text = f"👤 {user.mention} **{cat_names[category]}** modunda oyunu başlatdı! 🥳\n\n{user.first_name} - sözü izah edir..."
-        
+        text = f"👤 {user.mention} **{cat_names[category]}** modunda oyunu başlatdı!\n\n{user.first_name} - sözü izah edir..."
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Sözə Baxmaq 🔍", callback_data=f"look_{word}")],
             [InlineKeyboardButton("Fikrimi Dəyişdim (İmtina) ❌", callback_data="imtina")],
@@ -141,13 +137,15 @@ async def handle_query(client, callback_query: CallbackQuery):
         ])
         await callback_query.edit_message_text("🎮 **Hansı modda oyuna başlamaq istəyirsiniz?**", reply_markup=keyboard)
 
-import asyncio
-
+# Düzgün asyncio başlatma mexanizmi
 async def main():
-    async with app:
-        print("Bot işə düşdü...")
-        await asyncio.Event().wait()
+    await app.start()
+    print("Bot işə düşdü...")
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        pass
