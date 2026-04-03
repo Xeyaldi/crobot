@@ -141,4 +141,13 @@ async def handle_query(client, callback_query: CallbackQuery):
         ])
         await callback_query.edit_message_text("🎮 **Hansı modda oyuna başlamaq istəyirsiniz?**", reply_markup=keyboard)
 
-app.run()
+import asyncio
+
+async def main():
+    async with app:
+        print("Bot işə düşdü...")
+        await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
