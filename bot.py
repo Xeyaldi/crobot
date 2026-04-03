@@ -267,7 +267,7 @@ async def queries(client, callback_query: CallbackQuery):
             ])
             await callback_query.edit_message_text(text, reply_markup=keyboard)
         else:
-        await callback_query.answer("Artıq bir aparıcı var!", show_alert=True)
+           await callback_query.answer("Artıq bir aparıcı var!", show_alert=True)
 
     elif data == "back_menu":
         keyboard = InlineKeyboardMarkup([
