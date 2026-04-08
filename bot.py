@@ -106,7 +106,7 @@ async def start(client, message):
     kb = InlineKeyboardMarkup([
         [InlineKeyboardButton("➕ Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
         [InlineKeyboardButton("📜 Komandalar", callback_data="help_menu"), InlineKeyboardButton("🏆 Reyting", callback_data="back_rating")],
-        [InlineKeyboardButton("📢 Kanal", url=BOT_CHANNEL), InlineKeyboardButton("👤 Sahib", url=OWNER_LINK)]
+        [InlineKeyboardButton("⚔️Digər Botlar", url=BOT_CHANNEL), InlineKeyboardButton("👩🏻‍💻𝐨𝐰𝐧𝐞𝐫𝐚", url=OWNER_LINK)]
     ])
     await message.reply_photo(photo=START_IMG, caption=text, reply_markup=kb)
 
