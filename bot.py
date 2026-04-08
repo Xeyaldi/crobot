@@ -94,7 +94,7 @@ HELP_TEXT = (
 @app.on_message(filters.command("start"))
 async def start(client, message):
     bot = await client.get_me()
-    m = await message.reply("⚙️ **Yüklənir...**")
+    m = await message.reply("🧝🏻‍♀️🪄 **Yüklənir...**")
     await asyncio.sleep(0.4); await m.delete()
     
     text = (
