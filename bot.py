@@ -101,7 +101,7 @@ async def start(client, message):
         f"✨ **Salam, mən {bot.first_name}!**\n\n"
         "🎮 Mən qruplarda **Səssiz Sinema (Cro)** oynadan əyləncəli botam.\n"
         "Aparıcı sözü izah edir, digərləri tapmağa çalışır.\n\n"
-        "👇 Aşağıdakı düymələrdən istifadə edə bilərsiniz:"
+        "/komekcro **yazaraq komutlar haqqında məlumat əldə edə bilərsiniz**"
     )
     kb = InlineKeyboardMarkup([
         [InlineKeyboardButton("➕ Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
