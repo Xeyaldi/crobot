@@ -290,6 +290,16 @@ async def menu_cmd(client, message):
     ])
     await message.reply("🎮 **Səssiz Sinema (Cro)**\nHansı rejimdə oynamaq istəyirsiniz?\n\n💬 *Chat:* Tapan yeni aparıcı olur.\n🎙 *Səsli:* Aparıcı sabit qalır.", reply_markup=kb)
 
+# --- OYUNU DAYANDIRMAQ ---
+@app.on_message(filters.command("crostop") & filters.group)
+async def stop_game(client, message):
+    chat_id = message.chat.id
+    if chat_id in active_games:
+        del active_games[chat_id]
+        await message.reply(f"🛑 Oyun **{message.from_user.mention}** tərəfindən dayandırıldı!")
+    else:
+        await message.reply("⚠️ Hal-hazırda aktiv bir oyun yoxdur.")
+        
 # --- CALLBACKS ---
 @app.on_callback_query()
 async def queries(client, callback_query: CallbackQuery):
