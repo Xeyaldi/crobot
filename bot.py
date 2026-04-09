@@ -396,19 +396,20 @@ async def queries(client, callback_query: CallbackQuery):
             await callback_query.answer(f"🎯 Sözün: {w}", show_alert=True)
             kb = InlineKeyboardMarkup([[InlineKeyboardButton("Sözə Bax 🔍", callback_data=f"look_{w}")], [InlineKeyboardButton("İmtina ❌", callback_data="imtina")], [InlineKeyboardButton("Növbeti ♻️", callback_data=f"next_{c}_{m}")]])
             await callback_query.edit_message_text(f"🎤 Yeni Aparıcı: {user.mention}", reply_markup=kb)
-
 # --- İŞƏ SALMA ---
 async def main():
-     await app.set_bot_commands([
+    await app.start()
+    await app.set_bot_commands([
         BotCommand("start", "Botu başladar"),
         BotCommand("game", "Yeni oyun başladar"),
-        BotCommand("crostop", "Oyunu dayandırar"), # Yeni əlavə olundu
+        BotCommand("crostop", "Oyunu dayandırar"),
         BotCommand("reyting", "Reytinq menyusu"),
         BotCommand("myreyting", "Şəxsi xalınız"),
         BotCommand("komekcro", "Kömək menyusu")
     ])
-    print("🚀 HT-Cro Bot İşləyir!")
-    await asyncio.Event().wait()
+    print("🚀 HT-Cro Bot İşləyir!") # Bu sətir yuxarıdakı await ilə eyni hizada olmalıdır
+    await asyncio.Event().wait()    # Bu sətir də həmçinin
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
+
