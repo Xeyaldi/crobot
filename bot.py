@@ -231,13 +231,22 @@ async def queries(client, callback_query: CallbackQuery):
 
 # --- KÖMƏK VƏ KOMANDALAR MƏTNİ ---
 HELP_TEXT = (
-    "🚀 **Botun Komandaları və İzahları:**\n\n"
-    "🔹 `/start` - Botu işə salar və menyunu göstərər.\n"
-    "🔹 `/game` - Qrupda yeni Cro oyunu başladar.\n"
-    "🔹 `/reyting` - Ümumi, qrup və top qruplar reytinqi.\n"
-    "🔹 `/myreyting` - Sizin şəxsi xalınızı göstərər.\n"
-    "🔹 `/komekcro` - Bu kömək menyusunu açar.\n\n"
-    "💡 **Qayda:** Aparıcı sözü tapana qədər izah etməlidir, amma sözün özünü yazmaq qadağandır!"
+    "✨ **Aysberg Cro Bot | Zərif Bələdçi** ✨\n\n"
+    "📜 **Oyunun İdarə Olunması**\n"
+    "💎 ━━━━━━━━━━━━━━━━━━ 💎\n"
+    "🌹 `/game` — Yeni bir oyuna təşrif buyurun\n"
+    "🎯 `/crostart` — Sürətli raunda başlayın\n"
+    "🛑 `/crostop` — Oyunu nəzakətlə sonlandırın\n\n"
+    "🏆 **Nailiyyətlər & Reytinq**\n"
+    "💎 ━━━━━━━━━━━━━━━━━━ 💎\n"
+    "📊 `/reyting` — Ən müvəffəqiyyətli oyunçular\n"
+    "👤 `/myreyting` — Sizin şəxsi xallarınız\n\n"
+    "📍 **Digər Bölmələr**\n"
+    "💎 ━━━━━━━━━━━━━━━━━━ 💎\n"
+    "⚙️ `/start` — Botu yenidən aktivləşdirin\n"
+    "📖 `/komekcro` — Bütün qaydalar və komandalar\n\n"
+    "🕯 **Qeyd:**\n"
+    "**sözü ilk tapan şəxs qalib gəlir** . Uğurlar!"
 )
 
 # --- START MESAJI ---
