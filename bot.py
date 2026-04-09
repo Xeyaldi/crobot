@@ -390,10 +390,10 @@ async def queries(client, callback_query: CallbackQuery):
 
 # --- İŞƏ SALMA ---
 async def main():
-    await app.start()
-    await app.set_bot_commands([
+     await app.set_bot_commands([
         BotCommand("start", "Botu başladar"),
         BotCommand("game", "Yeni oyun başladar"),
+        BotCommand("crostop", "Oyunu dayandırar"), # Yeni əlavə olundu
         BotCommand("reyting", "Reytinq menyusu"),
         BotCommand("myreyting", "Şəxsi xalınız"),
         BotCommand("komekcro", "Kömək menyusu")
