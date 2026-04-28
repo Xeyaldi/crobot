@@ -6,12 +6,12 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from motor.motor_asyncio import AsyncIOMotorClient
 
 # --- CONFIG VARS ---
-API_ID = int(os.environ.get("API_ID", 12345))
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-MONGO_URL = os.environ.get("MONGO_URL")
-LOG_GROUP = int(os.environ.get("LOG_GROUP", 0))
-OWNER_ID = int(os.environ.get("OWNER_ID", 0))
+API_ID = int(os.environ.get("API_ID", 34628590))
+API_HASH = os.environ.get("API_HASH", "78a65ef180771575a50fcd350f027e9d")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8730641396:AAFlJlS8IKnesbSjl1CVsGQw0aFOTzvF7TE")
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://cabbarovxeyal32_db_user:Xeyal032aze@cluster0.f3gogmg.mongodb.net/?appName=Cluster0")
+LOG_GROUP = int(os.environ.get("LOG_GROUP", -1002384573827))
+OWNER_ID = int(os.environ.get("OWNER_ID", 8371395083))
 
 START_IMG = os.environ.get("START_IMG", "https://telegra.ph/file/79965a3d00f7b0f68800a.jpg")
 SUPPORT_GRP = os.environ.get("SUPPORT_GRP", "https://t.me/sohbetqruprc")
