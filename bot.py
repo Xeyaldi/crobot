@@ -14,9 +14,9 @@ LOG_GROUP = int(os.environ.get("LOG_GROUP", 0))
 OWNER_ID = int(os.environ.get("OWNER_ID", 0))
 
 START_IMG = os.environ.get("START_IMG", "https://telegra.ph/file/79965a3d00f7b0f68800a.jpg")
-SUPPORT_GRP = os.environ.get("SUPPORT_GRP", "https://t.me/your_group")
-BOT_CHANNEL = os.environ.get("BOT_CHANNEL", "https://t.me/your_channel")
-OWNER_LINK = os.environ.get("OWNER_LINK", "https://t.me/your_username")
+SUPPORT_GRP = os.environ.get("SUPPORT_GRP", "https://t.me/sohbetqruprc")
+BOT_CHANNEL = os.environ.get("BOT_CHANNEL", "https://t.me/musiicays")
+OWNER_LINK = os.environ.get("OWNER_LINK", "https://t.me/Aysberqqq")
 
 # MongoDB
 mongo_client = AsyncIOMotorClient(MONGO_URL)
@@ -106,7 +106,7 @@ async def start(client, message):
     kb = InlineKeyboardMarkup([
         [InlineKeyboardButton("➕ Qrupa Əlavə Et", url=f"https://t.me/{bot.username}?startgroup=true")],
         [InlineKeyboardButton("📜 Komandalar", callback_data="help_menu"), InlineKeyboardButton("🏆 Reyting", callback_data="back_rating")],
-        [InlineKeyboardButton("⚔️ Digər botlar", url=BOT_CHANNEL), InlineKeyboardButton("👩🏻‍💻 𝐨𝐰𝐧𝐞𝐫𝐚", url=OWNER_LINK)]
+        [InlineKeyboardButton("🎧 **Musiqi Kanalı**", url=BOT_CHANNEL), InlineKeyboardButton("👩🏻‍💻 𝐨𝐰𝐧𝐞𝐫𝐚", url=OWNER_LINK)]
     ])
     await message.reply_photo(photo=START_IMG, caption=text, reply_markup=kb)
 
